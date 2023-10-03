@@ -125,6 +125,8 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 	fit.write_file_info()
 	fit.write_file_creator()
 
+	height = 170 # TODO get this from Garmin user profile
+
 	for group in groups:
 		# get extra physical measurements
 		dt = group.get_datetime()
@@ -133,6 +135,7 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 		muscle_mass = group.get_muscle_mass()
 		hydration = group.get_hydration()
 		bone_mass = group.get_bone_mass()
+		bmi = round(weight / pow(height, 2), 1)
 
 		fit.write_device_info(timestamp=dt)
 		fit.write_weight_scale(
@@ -141,7 +144,8 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 			percent_fat=fat_ratio,
 			percent_hydration=(hydration * 100.0 / weight) if (hydration and weight) else None,
 			bone_mass=bone_mass,
-			muscle_mass=muscle_mass
+			muscle_mass=muscle_mass,
+			bmi = bmi,
 		)
 		verbose_print('appending weight scale record... %s %skg %s%%\n' % (dt, weight, fat_ratio))
 	fit.finish()
@@ -160,9 +164,9 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 	garmin = init_garmin(garmin_username, garmin_password, verbose_print)
 	verbose_print("attempting to upload fit file...\n")
 	with tempfile.TemporaryDirectory() as td:
-	    activityfile = Path(td) / "f.fit"
-	    activityfile.write_bytes(fit.getvalue())
-	    try:
+		activityfile = Path(td) / "f.fit"        
+		activityfile.write_bytes(fit.getvalue())
+		try:
 			r = garmin.upload_activity(str(activityfile))
 			r.raise_for_status()
 			print("Fit file uploaded to Garmin Connect")
