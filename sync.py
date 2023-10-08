@@ -125,7 +125,12 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 	fit.write_file_info()
 	fit.write_file_creator()
 
-	height = 170 # TODO get this from Garmin user profile
+	# garmin connect
+	verbose_print('connecting to garmin...\n')
+	garmin = init_garmin(garmin_username, garmin_password, verbose_print)
+	verbose_print('reading height from garmin...\n')
+	height = garmin.garth.connectapi("/userprofile-service/userprofile/user-settings")["userData"]["height"]
+	# print(height)
 
 	for group in groups:
 		# get extra physical measurements
@@ -135,7 +140,7 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 		muscle_mass = group.get_muscle_mass()
 		hydration = group.get_hydration()
 		bone_mass = group.get_bone_mass()
-		bmi = round(weight / pow(height, 2), 1)
+		bmi = round(weight / pow(height / 100, 2), 1) # weight (kg) / [height (m)] ^ 2
 
 		fit.write_device_info(timestamp=dt)
 		fit.write_weight_scale(
@@ -160,8 +165,6 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 
 	# verbose_print("Fit file: " + fit.getvalue())
 
-	# garmin connect
-	garmin = init_garmin(garmin_username, garmin_password, verbose_print)
 	verbose_print("attempting to upload fit file...\n")
 	with tempfile.TemporaryDirectory() as td:
 		activityfile = Path(td) / "f.fit"        
