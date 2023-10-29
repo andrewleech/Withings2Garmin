@@ -58,7 +58,7 @@ def main():
 	p = OptionParser(usage=usage, option_class=DateOption)
 	p.add_option('--garmin-username', '--gu',  default=GARMIN_USERNAME, type='string', metavar='<user>', help='username to login Garmin Connect.')
 	p.add_option('--garmin-password', '--gp', default=GARMIN_PASSWORD, type='string', metavar='<pass>', help='password to login Garmin Connect.')
-	p.add_option('-f', '--fromdate', type='date', default="2022-01-01", metavar='<date>', help="Start date from the range, default: 2002-01-01")
+	p.add_option('-f', '--fromdate', type='date', default=date.today(), metavar='<date>', help="Start date from the range, default: 2002-01-01")
 	p.add_option('-t', '--todate', type='date', default=date.today(), metavar='<date>', help="End date from the range, default: Today")
 	p.add_option('--no-upload', action='store_true', help="Don't upload to Garmin Connect. Output binary-strings to stdout.")
 	p.add_option('-v', '--verbose', action='store_true', help='Run verbosely')
@@ -107,15 +107,18 @@ def sync(garmin_username, garmin_password, fromdate, todate, no_upload, verbose)
 			else:
 				sys.stdout.write(s)
 
-	if len(garmin_username) == 0 or len(garmin_password) == 0:
-		print("Garmin username or password not set!")
-		return
-
-	# Withings API
-	withings = WithingsAccount()
+	print("fromdate="+str(fromdate))		
+	print("todate="+str(todate))
 
 	startdate = int(time.mktime(fromdate.timetuple()))
 	enddate = int(time.mktime(todate.timetuple())) + 86399
+	
+	if len(garmin_username) == 0 or len(garmin_password) == 0:
+		print("Garmin username or password not set!")
+		return
+	
+	# Withings API
+	withings = WithingsAccount()
 
 	groups = withings.getMeasurements(startdate=startdate, enddate=enddate)
 
