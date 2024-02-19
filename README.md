@@ -93,3 +93,29 @@ If you would like to specidy manualy  range you can do it by executing following
 ## References
 
 Thanks to jaroslawhartman for sharing code of withings-garmin-v2. This app is based on his briliant project.
+
+## More stuff
+
+Cron run every day at 11am
+`crontab -e`
+
+```
+0 10 * * * bash /src/Withings2Garmin/run.sh &> /src/Withings2Garmin/logs/sync.log
+```
+
+run.sh
+```
+#!/bin/bash
+
+echo `date`
+cd /src/Withings2Garmin;
+./sync.py
+
+echo "----------------------------------------"
+```
+
+`chmod +x run.sh`
+
+Test cron: `run-parts /etc/cron.daily`
+
+
